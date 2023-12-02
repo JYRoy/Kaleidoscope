@@ -17,6 +17,22 @@
 // logger headers
 #include "logger/logger.h"
 
+// kaleidoscope headers
+#include "kaleidoscope/kaleidoscope.h"
+
+// LLVM headers
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
+
 // stdlib headers
 #include <algorithm>
 #include <cctype>
@@ -28,27 +44,39 @@
 #include <vector>
 
 static void HandleDefinition() {
-    if(auto FnAST = ParseDefinition()) {
-        fprintf(stderr, "Parsed a function definition.\n");
-    } else {
-        getNextToken();
+  if (auto FnAST = ParseDefinition()) {
+    if (auto *FnIR = FnAST->Codegen()) {
+      fprintf(stderr, "Read function definition:");
+      FnIR->print(llvm::errs());
+      fprintf(stderr, "\n");
     }
+  } else {
+    getNextToken();
+  }
 }
 
 static void HandleExtern() {
-    if(ParseExtern()) {
-        fprintf(stderr, "Parsed an extern\n");
-    } else {
-        getNextToken();
+  if (auto ProtoAST = ParseExtern()) {
+    if (auto *FnIR = ProtoAST->Codegen()) {
+      fprintf(stderr, "Read extern:");
+      FnIR->print(llvm::errs());
+      fprintf(stderr, "\n");
     }
+  } else {
+    getNextToken();
+  }
 }
 
 static void HandleTopLevelExpression() {
-    if(ParseTopLevelExpr()) {
-        fprintf(stderr, "Parsed a top-level expr\n");
-    } else {
-        getNextToken();
+  if (auto FnAST = ParseTopLevelExpr()) {
+    if (auto *FnIR = FnAST->Codegen()) {
+      fprintf(stderr, "Read top-level expression:");
+      FnIR->print(llvm::errs());
+      fprintf(stderr, "\n");
     }
+  } else {
+    getNextToken();
+  }
 }
 
 static void MainLoop() {
@@ -73,6 +101,12 @@ static void MainLoop() {
     }
 }
 
+extern "C"
+double putchard(double X) {
+  putchar((char)X);
+  return 0;
+}
+
 int main() {
     BinopPrecedence['<'] = 10;
     BinopPrecedence['+'] = 20;
@@ -80,6 +114,10 @@ int main() {
     BinopPrecedence['*'] = 40;
     fprintf(stderr, "ready> ");
     getNextToken();
+    
+    TheModule = std::make_unique<llvm::Module>("My awesome JIT", TheContext);
+
     MainLoop();
+    TheModule->print(llvm::errs(), nullptr);
     return 0;
 }

@@ -1,5 +1,5 @@
-SOURCES = $(shell find ast lexer logger parser -name '*.cpp')
-HEADERS = $(shell find ast lexer logger parser -name '*.h')
+SOURCES = $(shell find ast lexer logger parser kaleidoscope -name '*.cpp')
+HEADERS = $(shell find ast lexer logger parser kaleidoscope -name '*.h')
 OBJ = ${SOURCES:.cpp=.o}
 
 CC = clang++

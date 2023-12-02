@@ -2,6 +2,7 @@
 #define __NUMBER_EXPR_AST_H__
 
 #include "ast/ExprAST.h"
+#include "kaleidoscope/kaleidoscope.h"
 
 // 数值（字面值）表达式，ExprAST的子类
 class NumberExprAST: public ExprAST {
@@ -10,7 +11,7 @@ private:
 
 public:
     NumberExprAST(double val): Val(val) {};
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };
 
 #endif

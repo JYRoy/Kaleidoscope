@@ -42,4 +42,18 @@ BinopPrecedence['*'] = 40;  // 最高优先级
 
 ## LLVM Codegen
 
-每种AST节点的Codegen方法负责生成该类型AST节点的IR代码及其他信息，生成的内容以Value类型对象的形式返回。LLVM用Value类标识静态单赋值（SSA）
+每种AST节点的Codegen方法负责生成该类型AST节点的IR代码及其他信息，生成的内容以Value类型对象的形式返回。LLVM用Value类标识静态单赋值（SSA）。
+
+LLVM支持了各种各样的指令来支持各种表达式：![LLVM Language Reference Manual](https://llvm.org/docs/LangRef.html)
+
+Kaleidoscope语言生成的llvm ir示例：
+
+```shell
+ready> def foo(x y) x+foo(y, 4.0);
+ready> Read function definition:define double @foo(double %x, double %y) {
+entry:
+  %calltmp = call double @foo(double %y, double 4.000000e+00)
+  %addtmp = fadd double %x, %calltmp
+  ret double %addtmp
+}
+```

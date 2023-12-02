@@ -2,7 +2,7 @@
 #define __VARIABLE_EXPR_AST_H__
 
 #include "ast/ExprAST.h"
-
+#include "logger/logger.h"
 
 // 保存变量
 class VariableExprAST: public ExprAST {
@@ -11,7 +11,7 @@ private:
 
 public:
     VariableExprAST(const std::string &name): Name(name) {}
-    virtual Value *Codegen();
+    virtual llvm::Value *Codegen();
 };
 
 #endif
